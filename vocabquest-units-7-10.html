@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>VocabQuest – Units 7 &amp; 10</title>
+<style>
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f5f3ff;--txt:#1e1b4b;--mut:#6b7280;
+  --pur:#7c3aed;--pl:#ede9fe;
+  --tea:#0891b2;--cor:#e11d48;
+  --ok:#16a34a;--gbg:#f0fdf4;
+  --red:#dc2626;--rbg:#fef2f2;
+  --amb:#b45309;--abg:#fffbeb;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;}
+button{cursor:pointer;touch-action:manipulation;font-family:inherit;}
+button *{pointer-events:none;}
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+.hero{background:linear-gradient(145deg,var(--pur),#6d28d9);color:white;padding:32px 20px 28px;text-align:center;border-radius:0 0 28px 28px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;width:180px;height:180px;background:rgba(255,255,255,.06);border-radius:50%;top:-60px;right:-40px;}
+.hero::after{content:'';position:absolute;width:120px;height:120px;background:rgba(255,255,255,.04);border-radius:50%;bottom:-30px;left:-20px;}
+.hero-tag{font-size:.75rem;font-weight:700;background:rgba(255,255,255,.18);display:inline-block;padding:4px 14px;border-radius:100px;margin-bottom:10px;letter-spacing:.5px;}
+.hero h1{font-size:2rem;font-weight:900;margin-bottom:2px;}
+.hero .home-sub{font-size:.95rem;opacity:.85;}
+.hbody{padding:18px 16px 40px;max-width:500px;margin:0 auto;width:100%;}
+.prog-card{background:white;border-radius:18px;padding:18px 16px 14px;box-shadow:0 3px 18px rgba(124,58,237,.11);margin-bottom:20px;}
+.prog-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.prog-row .lbl{font-size:.85rem;font-weight:700;color:var(--mut);}
+.prog-row .num{font-size:.95rem;font-weight:900;color:var(--pur);}
+.prog-track{height:10px;background:var(--pl);border-radius:10px;overflow:hidden;margin-bottom:10px;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--pur),#a855f7);border-radius:10px;transition:width .5s;}
+.tog-btn{width:100%;background:none;border:1.5px dashed #d1d5db;border-radius:10px;padding:9px;font-size:.82rem;font-weight:700;color:var(--mut);}
+.wg{max-height:0;overflow:hidden;transition:max-height .4s ease;}
+.wg.open{max-height:320px;overflow-y:auto;}
+.wg-inner{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding-top:10px;}
+.wg-item{display:flex;justify-content:space-between;align-items:center;background:#fafafa;border:1px solid #ede9fe;border-radius:8px;padding:6px 10px;font-size:.78rem;font-weight:600;}
+.wg-item span:last-child{font-size:.62rem;letter-spacing:-1px;}
+.sec{font-size:.8rem;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;margin-top:4px;}
+.act-btn{display:flex;align-items:center;width:100%;border:none;border-radius:16px;padding:16px 14px;margin-bottom:10px;color:white;text-align:left;box-shadow:0 4px 14px rgba(0,0,0,.12);}
+.act-btn .icon{font-size:1.6rem;margin-right:12px;flex-shrink:0;}
+.act-btn .lbl{flex:1;}
+.act-btn .lbl h3{font-size:1rem;font-weight:800;margin-bottom:1px;}
+.act-btn .lbl p{font-size:.78rem;opacity:.85;font-weight:500;}
+.act-btn .arr{font-size:1.4rem;opacity:.6;margin-left:8px;}
+.emerald{background:linear-gradient(135deg,#059669,#10b981);}
+.coral{background:linear-gradient(135deg,var(--cor),#f43f5e);}
+.purple{background:linear-gradient(135deg,var(--pur),#a855f7);}
+.rst-btn{display:block;width:100%;background:none;border:none;color:var(--mut);font-size:.8rem;margin-top:16px;padding:10px;font-weight:600;}
+.rst-btn.confirm{color:var(--red);font-weight:800;}
+.ahdr{display:flex;align-items:center;padding:14px 16px;background:white;border-bottom:1px solid #f3f4f6;position:sticky;top:0;z-index:50;}
+.ahdr .back{background:none;border:none;font-size:1.4rem;padding:4px 10px 4px 0;color:var(--txt);}
+.ahdr h2{flex:1;font-size:1rem;font-weight:800;}
+.ahdr .actr{font-size:.82rem;color:var(--mut);font-weight:700;}
+.abody{padding:18px 16px 40px;max-width:560px;margin:0 auto;width:100%;}
+.txt-title{font-size:1.2rem;font-weight:900;text-align:center;margin-bottom:6px;color:var(--pur);}
+.txt-hint{text-align:center;font-size:.85rem;color:var(--mut);margin-bottom:16px;}
+.story-img{width:100%;border-radius:16px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,.1);}
+.passage{font-size:1.05rem;line-height:1.85;color:var(--txt);}
+.passage p{margin-bottom:14px;}
+.vw{background:var(--pl);color:#5b21b6;padding:2px 5px;border-radius:6px;font-weight:700;border-bottom:2px solid var(--pur);cursor:pointer;transition:all .2s;}
+.vw.seen{background:var(--gbg);color:var(--ok);border-bottom-color:var(--ok);}
+.audio-box{background:white;border-radius:14px;padding:14px 16px;margin-top:20px;box-shadow:0 2px 12px rgba(124,58,237,.08);text-align:center;}
+.audio-box .audio-lbl{font-size:.82rem;font-weight:700;color:var(--mut);margin-bottom:8px;}
+.audio-box audio{width:100%;border-radius:8px;}
+.popup-ovl{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,5,35,.6);z-index:150;align-items:center;justify-content:center;padding:20px;}
+.popup-ovl.on{display:flex;}
+.pop-card{background:white;border-radius:20px;padding:26px 22px 20px;max-width:340px;width:100%;position:relative;box-shadow:0 10px 40px rgba(0,0,0,.2);animation:popIn .25s ease-out;}
+@keyframes popIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.pop-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:1.4rem;color:var(--mut);padding:4px;}
+.pop-word{font-size:1.55rem;font-weight:900;color:var(--pur);margin-bottom:2px;}
+.pop-meta{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.pop-pos{background:var(--pl);color:var(--pur);padding:3px 8px;border-radius:6px;font-size:.78rem;font-weight:700;}
+.pop-pron{color:var(--mut);font-size:.85rem;}
+.pop-listen{background:none;border:1px solid #d1d5db;border-radius:8px;padding:4px 10px;font-size:.85rem;color:var(--txt);cursor:pointer;}
+.pop-uzbek{color:var(--tea);font-weight:800;font-size:1.15rem;margin-bottom:10px;}
+.pop-ex{background:#f5f3ff;border-left:3px solid var(--pur);padding:8px 12px;border-radius:0 8px 8px 0;font-size:.9rem;line-height:1.5;margin-bottom:12px;}
+.pop-star{text-align:center;font-size:.85rem;color:var(--mut);}
+.qcard{background:white;border-radius:18px;padding:24px 20px;box-shadow:0 3px 16px rgba(124,58,237,.09);margin-bottom:16px;}
+.qlbl{font-size:.72rem;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;text-align:center;}
+.quzb{font-size:1.6rem;font-weight:900;color:var(--tea);text-align:center;margin-bottom:16px;line-height:1.3;}
+.opts{display:flex;flex-direction:column;gap:8px;}
+.opt{display:flex;align-items:center;background:white;border:2.5px solid #e5e7eb;border-radius:12px;padding:13px 12px;font-weight:700;font-size:.92rem;text-align:left;width:100%;}
+.opt .obadge{background:#f3f4f6;border-radius:7px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:900;flex-shrink:0;color:var(--pur);margin-right:10px;}
+.opt.ok{border-color:var(--ok);background:var(--gbg);color:var(--ok);}
+.opt.ok .obadge{background:var(--ok);color:white;}
+.opt.ng{border-color:var(--red);background:var(--rbg);color:var(--red);}
+.opt.ng .obadge{background:var(--red);color:white;}
+.fb{display:none;padding:10px 14px;border-radius:10px;margin-top:12px;font-weight:700;font-size:.88rem;text-align:center;}
+.fb.ok{background:var(--gbg);color:var(--ok);}
+.fb.ng{background:var(--rbg);color:var(--red);}
+.fb.warn{background:var(--abg);color:var(--amb);}
+.nxt-btn{display:none;margin-top:12px;width:100%;padding:13px;border:none;border-radius:12px;font-weight:800;font-size:.95rem;color:white;}
+.nxt-mcq{background:var(--cor);}
+.nxt-typ{background:var(--pur);}
+.mini-prog{height:4px;background:#e5e7eb;overflow:hidden;}
+.mini-fill{height:100%;border-radius:0 4px 4px 0;transition:width .3s;}
+.mini-fill.mcq-fill{background:var(--cor);}
+.mini-fill.typ-fill{background:var(--pur);}
+.typ-card{background:white;border-radius:18px;padding:24px 20px;box-shadow:0 3px 16px rgba(124,58,237,.09);}
+.typ-uzbek{font-size:1.6rem;font-weight:900;color:var(--tea);text-align:center;margin-bottom:16px;line-height:1.3;}
+.typ-inp{width:100%;border:2.5px solid #e5e7eb;border-radius:12px;padding:14px;font-size:1.1rem;text-align:center;outline:none;font-family:inherit;font-weight:600;transition:border-color .2s;}
+.typ-inp:focus{border-color:var(--pur);}
+.typ-btn{margin-top:10px;width:100%;padding:13px;border:none;border-radius:12px;font-weight:800;font-size:.95rem;color:white;background:var(--pur);}
+.ovl{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,5,35,.75);z-index:200;align-items:center;justify-content:center;padding:20px;}
+.ovl.on{display:flex;}
+.ovl-card{background:white;border-radius:24px;padding:34px 24px;max-width:380px;width:100%;text-align:center;animation:popIn .35s ease-out;}
+.co-emoji{font-size:3rem;margin-bottom:8px;}
+.co-title{font-size:1.6rem;font-weight:900;color:var(--pur);margin-bottom:6px;}
+.co-sub{color:var(--mut);font-size:.9rem;margin-bottom:14px;}
+.co-score{background:var(--pl);color:var(--pur);border-radius:10px;padding:9px 14px;font-weight:800;font-size:.88rem;margin-bottom:14px;}
+.co-badge{background:linear-gradient(135deg,var(--pur),#a855f7);color:white;border-radius:16px;padding:14px;margin-bottom:16px;}
+.co-badge .big{font-size:2.2rem;font-weight:900;line-height:1;}
+.co-badge .sm{font-size:.8rem;opacity:.85;margin-top:4px;}
+.co-btns{display:flex;gap:8px;}
+.co-btn{flex:1;padding:13px 10px;border:none;border-radius:12px;font-weight:800;font-size:.88rem;}
+.co-home{background:var(--pl);color:var(--pur);}
+.co-again{background:var(--pur);color:white;}
+
+.grp-title{font-size:.95rem;font-weight:800;color:var(--pur);margin-bottom:10px;margin-top:18px;padding-left:2px;}
+.grp-title:first-child{margin-top:0;}
+.word-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
+.wl-item{background:white;border:2px solid var(--pl);border-radius:12px;padding:12px 10px;text-align:center;font-weight:700;font-size:.92rem;color:#5b21b6;cursor:pointer;transition:all .2s;}
+.wl-item.seen{background:var(--gbg);border-color:var(--ok);color:var(--ok);}
+
+
+.unit-select{padding:18px 16px 40px;max-width:500px;margin:0 auto;width:100%;}
+.unit-card{background:white;border:2.5px solid var(--pl);border-radius:16px;padding:20px 16px;margin-bottom:12px;cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:0 2px 12px rgba(124,58,237,.06);transition:all .2s;}
+.unit-card:active{transform:scale(.98);}
+.unit-card .uc-emoji{font-size:1.6rem;}
+.unit-card .uc-info{flex:1;}
+.unit-card .uc-info h3{font-size:1rem;font-weight:800;color:var(--txt);margin-bottom:2px;}
+.unit-card .uc-info p{font-size:.78rem;color:var(--mut);font-weight:500;}
+.unit-card .uc-arr{font-size:1.4rem;opacity:.5;color:var(--pur);}
+.unit-card.coral-card{border-color:#fecdd3;}
+.unit-card.purple-card{border-color:#e9d5ff;}
+</style>
+</head>
+<body>
+
+<div class="popup-ovl" id="popup-ovl">
+  <div class="pop-card" id="pop-card">
+    <button type="button" class="pop-close" id="pop-close">✕</button>
+    <div class="pop-word" id="pop-word"></div>
+    <div class="pop-meta">
+      <span class="pop-pos" id="pop-pos"></span>
+      <span class="pop-pron" id="pop-pron"></span>
+      <button type="button" class="pop-listen" id="pop-listen">▶ Listen</button>
+    </div>
+    <div class="pop-uzbek" id="pop-uzbek"></div>
+    <div class="pop-ex" id="pop-ex"></div>
+    <div class="pop-star" id="pop-star"></div>
+  </div>
+</div>
+
+<div id="s-home" class="screen active">
+  <div class="hero">
+    <div class="hero-tag">📖 Units 7 &amp; 10</div>
+    <h1>📚 VocabQuest</h1>
+    <p class="home-sub">38 words · 3 activities · master them all!</p>
+  </div>
+  <div class="hbody">
+    <div class="prog-card">
+      <div class="prog-row">
+        <span class="lbl">📊 Your Progress</span>
+        <span class="num" id="h-count">0 / 38</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="h-bar"></div></div>
+      <button type="button" class="tog-btn" id="tog-btn">▾ View word details</button>
+      <div class="wg" id="wg"><div class="wg-inner" id="wg-inner"></div></div>
+    </div>
+    <p class="sec">Choose an Activity</p>
+    <button type="button" class="act-btn emerald" id="go-text">
+      <span class="icon">📖</span>
+      <span class="lbl"><h3>Study Mode</h3><p>Tap words to learn pronunciation &amp; meaning</p></span>
+      <span class="arr">›</span>
+    </button>
+    <button type="button" class="act-btn coral" id="go-mcq">
+      <span class="icon">🔤</span>
+      <span class="lbl"><h3>Quiz (A-B-C-D)</h3><p>See Uzbek → pick the English word</p></span>
+      <span class="arr">›</span>
+    </button>
+    <button type="button" class="act-btn purple" id="go-typ">
+      <span class="icon">⌨️</span>
+      <span class="lbl"><h3>Typing Challenge</h3><p>See Uzbek → type the English word</p></span>
+      <span class="arr">›</span>
+    </button>
+    <button type="button" class="rst-btn" id="rst-btn">Reset all progress</button>
+  </div>
+</div>
+
+<div id="s-text" class="screen">
+  <div class="ahdr">
+    <button type="button" class="back" id="back-text">←</button>
+    <h2>📖 Study Mode</h2>
+    <span class="actr" id="text-ctr">0 / 38 seen</span>
+  </div>
+  <div class="abody">
+    <div class="txt-hint">👆 Tap any word to learn it</div>
+    <div id="study-area"></div>
+  </div>
+</div>
+
+<div id="s-mcq" class="screen">
+  <div class="ahdr">
+    <button type="button" class="back" id="back-mcq">←</button>
+    <h2>🔤 Quiz</h2>
+    <span class="actr" id="mcq-ctr">1 / 38</span>
+  </div>
+  <div class="mini-prog"><div class="mini-fill mcq-fill" id="mcq-bar" style="width:0%"></div></div>
+  <div class="abody">
+    <div class="qcard">
+      <div class="qlbl">What is the English word for:</div>
+      <div class="quzb" id="mcq-uzb"></div>
+      <div class="opts" id="mcq-opts"></div>
+      <div class="fb" id="mcq-fb"></div>
+      <button type="button" class="nxt-btn nxt-mcq" id="mcq-nxt">Next →</button>
+    </div>
+  </div>
+</div>
+
+<div id="s-typ" class="screen">
+  <div class="ahdr">
+    <button type="button" class="back" id="back-typ">←</button>
+    <h2>⌨️ Typing</h2>
+    <span class="actr" id="typ-ctr">1 / 38</span>
+  </div>
+  <div class="mini-prog"><div class="mini-fill typ-fill" id="typ-bar" style="width:0%"></div></div>
+  <div class="abody">
+    <div class="typ-card">
+      <div class="qlbl">Type the English word for:</div>
+      <div class="typ-uzbek" id="typ-uzb"></div>
+      <input class="typ-inp" id="typ-inp" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Type the English word...">
+      <div class="fb" id="typ-fb"></div>
+      <button type="button" class="typ-btn" id="typ-chk">Check ✓</button>
+      <button type="button" class="nxt-btn nxt-typ" id="typ-nxt" style="display:none">Next →</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="s-mcq-select" class="screen">
+  <div class="ahdr">
+    <button type="button" class="back" id="back-mcq-sel">←</button>
+    <h2>🔤 Quiz — Choose Unit</h2>
+    <span class="actr"></span>
+  </div>
+  <div class="unit-select">
+    <div class="unit-card coral-card" id="mcq-u7">
+      <span class="uc-emoji">📕</span>
+      <div class="uc-info"><h3>Unit 7</h3><p>Feelings &amp; Activities · 16 words</p></div>
+      <span class="uc-arr">›</span>
+    </div>
+    <div class="unit-card coral-card" id="mcq-u10">
+      <span class="uc-emoji">📗</span>
+      <div class="uc-info"><h3>Unit 10</h3><p>Food &amp; Drinks · 22 words</p></div>
+      <span class="uc-arr">›</span>
+    </div>
+  </div>
+</div>
+
+<div id="s-typ-select" class="screen">
+  <div class="ahdr">
+    <button type="button" class="back" id="back-typ-sel">←</button>
+    <h2>⌨️ Typing — Choose Unit</h2>
+    <span class="actr"></span>
+  </div>
+  <div class="unit-select">
+    <div class="unit-card purple-card" id="typ-u7">
+      <span class="uc-emoji">📕</span>
+      <div class="uc-info"><h3>Unit 7</h3><p>Feelings &amp; Activities · 16 words</p></div>
+      <span class="uc-arr">›</span>
+    </div>
+    <div class="unit-card purple-card" id="typ-u10">
+      <span class="uc-emoji">📗</span>
+      <div class="uc-info"><h3>Unit 10</h3><p>Food &amp; Drinks · 22 words</p></div>
+      <span class="uc-arr">›</span>
+    </div>
+  </div>
+</div>
+<div class="ovl" id="comp-ovl">
+  <div class="ovl-card">
+    <div class="co-emoji" id="co-emoji"></div>
+    <div class="co-title" id="co-title"></div>
+    <div class="co-sub" id="co-sub"></div>
+    <div class="co-score" id="co-score"></div>
+    <div class="co-badge"><div class="big" id="co-mast"></div><div class="sm">words fully mastered</div></div>
+    <div class="co-btns">
+      <button type="button" class="co-btn co-home" id="co-home">🏠 Home</button>
+      <button type="button" class="co-btn co-again" id="co-again">🔄 Again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var W = [
+  {word:"upset",pos:"adj.",pron:"[\u028Cp\u02C8set]",uzbek:"xafa / tushkun",ex:"She was <b>upset</b> because she lost her phone.",grp:0},
+  {word:"thirsty",pos:"adj.",pron:"[\u02C8\u03B8\u025C\u02D0rsti]",uzbek:"chanqagan",ex:"I am very <b>thirsty</b>. Can I have some water?",grp:0},
+  {word:"hungry",pos:"adj.",pron:"[\u02C8h\u028C\u014Bgri]",uzbek:"qorni och",ex:"The children are <b>hungry</b> after school.",grp:0},
+  {word:"well",pos:"adj.",pron:"[wel]",uzbek:"yaxshi / sog\u2018lom",ex:"I don\u2019t feel <b>well</b> today.",grp:0},
+  {word:"surprised",pos:"adj.",pron:"[s\u0259r\u02C8pra\u026Azd]",uzbek:"hayratda / hayratlangan",ex:"She was <b>surprised</b> to see her old friend.",grp:0},
+  {word:"happy about",pos:"phr.",pron:"[\u02C8h\u00E6pi \u0259\u02C8ba\u028At]",uzbek:"nimadirdan xursand bo\u2018lmoq",ex:"I am <b>happy about</b> my exam results.",grp:0},
+  {word:"happy for",pos:"phr.",pron:"[\u02C8h\u00E6pi f\u0254\u02D0r]",uzbek:"kimdir uchun xursand bo\u2018lmoq",ex:"We are <b>happy for</b> you and your new job!",grp:0},
+  {word:"prefer",pos:"v.",pron:"[pr\u026A\u02C8f\u025C\u02D0r]",uzbek:"afzal ko\u2018rmoq",ex:"I <b>prefer</b> tea to coffee.",grp:0},
+  {word:"hope",pos:"v.",pron:"[ho\u028Ap]",uzbek:"umid qilmoq",ex:"I <b>hope</b> the weather will be nice tomorrow.",grp:0},
+  {word:"a bit",pos:"adv.",pron:"[\u0259 b\u026At]",uzbek:"sal / ozgina",ex:"I am <b>a bit</b> tired after the walk.",grp:0},
+  {word:"sunbathing",pos:"n.",pron:"[\u02C8s\u028Cnbe\u026A\u00F0\u026A\u014B]",uzbek:"quyoshda toblanish",ex:"She loves <b>sunbathing</b> on the beach.",grp:0},
+  {word:"sightseeing",pos:"n.",pron:"[\u02C8sa\u026Atsi\u02D0\u026A\u014B]",uzbek:"diqqatga sazovor joylarni aylanish",ex:"We went <b>sightseeing</b> in Istanbul.",grp:0},
+  {word:"weather",pos:"n.",pron:"[\u02C8we\u00F0\u0259r]",uzbek:"ob-havo",ex:"The <b>weather</b> is sunny today.",grp:0},
+  {word:"spider",pos:"n.",pron:"[\u02C8spa\u026Ad\u0259r]",uzbek:"o\u2018rgimchak",ex:"There is a big <b>spider</b> on the wall.",grp:0},
+  {word:"horror film",pos:"n.",pron:"[\u02C8h\u0252r\u0259r f\u026Alm]",uzbek:"qo\u2018rqinchli film",ex:"I don\u2019t like watching <b>horror films</b> at night.",grp:0},
+  {word:"best friend",pos:"n.",pron:"[best frend]",uzbek:"eng yaxshi do\u2018st",ex:"Anna is my <b>best friend</b>. We do everything together.",grp:0},
+  {word:"bread",pos:"n.",pron:"[bred]",uzbek:"non",ex:"Can you buy some <b>bread</b> from the shop?",grp:1},
+  {word:"pasta",pos:"n.",pron:"[\u02C8p\u00E6st\u0259]",uzbek:"makaron",ex:"We had <b>pasta</b> with tomato sauce for dinner.",grp:1},
+  {word:"rice",pos:"n.",pron:"[ra\u026As]",uzbek:"guruch",ex:"<b>Rice</b> is very popular in Asia.",grp:1},
+  {word:"salt",pos:"n.",pron:"[s\u0254\u02D0lt]",uzbek:"tuz",ex:"Can you pass me the <b>salt</b>, please?",grp:1},
+  {word:"chips",pos:"n.",pron:"[t\u0283\u026Aps]",uzbek:"kartoshka fri (brit.)",ex:"I ordered fish and <b>chips</b> for lunch.",grp:1},
+  {word:"french fries",pos:"n.",pron:"[frent\u0283 fra\u026Az]",uzbek:"kartoshka fri (amer.)",ex:"The burger came with <b>french fries</b>.",grp:1},
+  {word:"pepper",pos:"n.",pron:"[\u02C8pep\u0259r]",uzbek:"murch / qalampir",ex:"Add some <b>pepper</b> to make it spicy.",grp:1},
+  {word:"sugar",pos:"n.",pron:"[\u02C8\u0283\u028Ag\u0259r]",uzbek:"shakar",ex:"Do you want <b>sugar</b> in your tea?",grp:1},
+  {word:"carrot",pos:"n.",pron:"[\u02C8k\u00E6r\u0259t]",uzbek:"sabzi",ex:"Rabbits love to eat <b>carrots</b>.",grp:1},
+  {word:"beans",pos:"n.",pron:"[bi\u02D0nz]",uzbek:"loviya",ex:"We grow <b>beans</b> in our garden.",grp:1},
+  {word:"peas",pos:"n.",pron:"[pi\u02D0z]",uzbek:"no\u2018xat",ex:"I like <b>peas</b> in my soup.",grp:1},
+  {word:"onion",pos:"n.",pron:"[\u02C8\u028Cnj\u0259n]",uzbek:"piyoz",ex:"Cutting an <b>onion</b> makes me cry.",grp:1},
+  {word:"garlic",pos:"n.",pron:"[\u02C8g\u0251\u02D0rl\u026Ak]",uzbek:"sarimsoqpiyoz",ex:"I always add <b>garlic</b> when I cook.",grp:1},
+  {word:"mushroom",pos:"n.",pron:"[\u02C8m\u028C\u0283ru\u02D0m]",uzbek:"qo\u2018ziqorin",ex:"This pizza has <b>mushrooms</b> on top.",grp:1},
+  {word:"pear",pos:"n.",pron:"[pe\u0259r]",uzbek:"nok",ex:"I ate a sweet <b>pear</b> for breakfast.",grp:1},
+  {word:"grape",pos:"n.",pron:"[gre\u026Ap]",uzbek:"uzum",ex:"<b>Grapes</b> grow on vines.",grp:1},
+  {word:"strawberry",pos:"n.",pron:"[\u02C8str\u0254\u02D0b\u0259ri]",uzbek:"qulupnay",ex:"I love <b>strawberry</b> ice cream.",grp:1},
+  {word:"pineapple",pos:"n.",pron:"[\u02C8pa\u026An\u00E6pl]",uzbek:"ananas",ex:"<b>Pineapple</b> juice is very sweet.",grp:1},
+  {word:"beer",pos:"n.",pron:"[b\u026Ar]",uzbek:"pivo",ex:"He ordered a glass of <b>beer</b>.",grp:1},
+  {word:"wine",pos:"n.",pron:"[wa\u026An]",uzbek:"vino / may",ex:"They had red <b>wine</b> with dinner.",grp:1},
+  {word:"popular",pos:"adj.",pron:"[\u02C8p\u0252pj\u028Al\u0259r]",uzbek:"mashhur",ex:"This song is very <b>popular</b> right now.",grp:1},
+  {word:"sausage",pos:"n.",pron:"[\u02C8s\u0252s\u026Ad\u0292]",uzbek:"kolbasa / sosiska",ex:"We had <b>sausages</b> for breakfast.",grp:1}
+];
+
+var GRP_NAMES = ['Unit 7 — Feelings & Activities', 'Unit 10 — Food & Drinks'];
+
+var KEY = 'vq-units-7-10-v1';
+var M = {};
+var gridOpen = false;
+var pIdx = null;
+var coCallback = null;
+
+var bestVoice = null;
+function pickVoice(){
+  var v = speechSynthesis.getVoices();
+  var prio = ['Google US English','Microsoft','Karen','Samantha','Alex'];
+  for(var p=0;p<prio.length;p++){
+    for(var i=0;i<v.length;i++){
+      if(v[i].name.indexOf(prio[p])!==-1 && v[i].lang.indexOf('en')===0){ bestVoice=v[i]; return; }
+    }
+  }
+  for(var i=0;i<v.length;i++){ if(v[i].lang.indexOf('en-US')===0){ bestVoice=v[i]; return; } }
+  for(var i=0;i<v.length;i++){ if(v[i].lang.indexOf('en')===0){ bestVoice=v[i]; return; } }
+}
+if(speechSynthesis.onvoiceschanged!==undefined) speechSynthesis.onvoiceschanged=pickVoice;
+pickVoice();
+
+function speak(text){
+  try{ var u=new SpeechSynthesisUtterance(text); if(bestVoice) u.voice=bestVoice; u.rate=0.85; speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){}
+}
+
+var audioCtx=null;
+function playBuzz(){
+  try{ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); var o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.type='square';o.frequency.value=180;g.gain.value=0.15; o.connect(g);g.connect(audioCtx.destination); o.start();g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.3); o.stop(audioCtx.currentTime+0.3); }catch(e){}
+}
+
+function loadM(){
+  try{ var s=localStorage.getItem(KEY); M=s?JSON.parse(s):{}; }catch(e){ M={}; }
+  for(var i=0;i<W.length;i++){ if(!M[i]) M[i]={fc:false,mcq:0,typ:0}; if(typeof M[i].mcq==='boolean') M[i].mcq=M[i].mcq?3:0; if(typeof M[i].typ==='boolean') M[i].typ=M[i].typ?2:0; }
+}
+function saveM(){ try{ localStorage.setItem(KEY,JSON.stringify(M)); }catch(e){} }
+function stars(i){ return (M[i].fc?1:0)+(M[i].mcq>=3?1:0)+(M[i].typ>=2?1:0); }
+function masteredCount(){ var c=0; for(var i=0;i<W.length;i++) if(stars(i)===3) c++; return c; }
+function totalStars(){ var c=0; for(var i=0;i<W.length;i++) c+=stars(i); return c; }
+
+function show(id){ var ss=document.querySelectorAll('.screen'); for(var i=0;i<ss.length;i++) ss[i].classList.remove('active'); document.getElementById(id).classList.add('active'); }
+function goHome(){ closeComp(); closePopup(); updateHome(); show('s-home'); }
+
+function updateHome(){
+  var mc=masteredCount(), ts=totalStars(), max=W.length*3;
+  document.getElementById('h-count').textContent=mc+' / '+W.length;
+  document.getElementById('h-bar').style.width=(ts/max*100)+'%';
+  var g=document.getElementById('wg-inner'); g.innerHTML='';
+  for(var i=0;i<W.length;i++){ var s=stars(i); var d=document.createElement('div'); d.className='wg-item'; d.innerHTML='<span>'+W[i].word+'</span><span>'+'⭐'.repeat(s)+'☆'.repeat(3-s)+'</span>'; g.appendChild(d); }
+}
+
+var rstTimer=null;
+function resetAll(){
+  var btn=document.getElementById('rst-btn');
+  if(btn.classList.contains('confirm')){ M={}; for(var i=0;i<W.length;i++) M[i]={fc:false,mcq:0,typ:0}; saveM(); updateHome(); btn.classList.remove('confirm'); btn.textContent='Reset all progress'; clearTimeout(rstTimer); }
+  else { btn.classList.add('confirm'); btn.textContent='⚠️ Tap again to confirm reset'; rstTimer=setTimeout(function(){ btn.classList.remove('confirm'); btn.textContent='Reset all progress'; },3000); }
+}
+
+// STUDY MODE
+function startText(){
+  show('s-text');
+  renderStudy();
+}
+function renderStudy(){
+  var area=document.getElementById('study-area');
+  area.innerHTML='';
+  for(var g=0;g<GRP_NAMES.length;g++){
+    var title=document.createElement('div'); title.className='grp-title'; title.textContent=GRP_NAMES[g];
+    area.appendChild(title);
+    var list=document.createElement('div'); list.className='word-list';
+    for(var i=0;i<W.length;i++){
+      if(W[i].grp!==g) continue;
+      var item=document.createElement('div'); item.className='wl-item'; item.setAttribute('data-idx',i);
+      item.textContent=W[i].word;
+      if(M[i]&&M[i].fc) item.classList.add('seen');
+      list.appendChild(item);
+    }
+    area.appendChild(list);
+  }
+  updateStudyCtr();
+}
+function updateStudyCtr(){
+  var seen=0; for(var i=0;i<W.length;i++) if(M[i]&&M[i].fc) seen++;
+  document.getElementById('text-ctr').textContent=seen+' / '+W.length+' seen';
+}
+
+// POPUP
+function showPopup(idx){
+  pIdx=idx; var w=W[idx];
+  document.getElementById('pop-word').textContent=w.word;
+  document.getElementById('pop-pos').textContent=w.pos;
+  document.getElementById('pop-pron').textContent=w.pron;
+  document.getElementById('pop-uzbek').textContent=w.uzbek;
+  document.getElementById('pop-ex').innerHTML=w.ex;
+  var s=stars(idx);
+  document.getElementById('pop-star').innerHTML='⭐'.repeat(s)+'☆'.repeat(3-s)+' — keep practising!';
+  if(!M[idx].fc){ M[idx].fc=true; saveM(); }
+  document.getElementById('popup-ovl').classList.add('on');
+  speak(w.word);
+  // Update seen state
+  var items=document.querySelectorAll('.wl-item');
+  for(var i=0;i<items.length;i++){
+    if(parseInt(items[i].getAttribute('data-idx'),10)===idx) items[i].classList.add('seen');
+  }
+  updateStudyCtr();
+}
+function closePopup(){ document.getElementById('popup-ovl').classList.remove('on'); pIdx=null; }
+
+function shuffle(arr){ var a=arr.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+// QUIZ
+var mOrder=[],mIdx=0,mScore=0,mDone=false;
+var mGroup=-1;
+function startMCQFiltered(grp){ mGroup=grp; mOrder=[]; for(var i=0;i<W.length;i++){ if(W[i].grp===grp) mOrder.push(i); } mOrder=shuffle(mOrder); mIdx=0; mScore=0; show('s-mcq'); renderMCQ(); }
+function startMCQ(){ startMCQFiltered(mGroup); }
+function renderMCQ(){
+  mDone=false; var wi=mOrder[mIdx];
+  document.getElementById('mcq-ctr').textContent=(mIdx+1)+' / '+mOrder.length;
+  document.getElementById('mcq-bar').style.width=(mIdx/mOrder.length*100)+'%';
+  document.getElementById('mcq-uzb').textContent=W[wi].uzbek;
+  document.getElementById('mcq-fb').style.display='none'; document.getElementById('mcq-fb').className='fb';
+  document.getElementById('mcq-nxt').style.display='none';
+  var opts=[wi]; var pool=[]; for(var k=0;k<W.length;k++){if(W[k].grp===mGroup&&k!==wi)pool.push(k);} pool=shuffle(pool); for(var k=0;k<Math.min(3,pool.length);k++) opts.push(pool[k]); opts=shuffle(opts);
+  var labels=['A','B','C','D']; var c=document.getElementById('mcq-opts'); c.innerHTML='';
+  for(var j=0;j<opts.length;j++){ var btn=document.createElement('button'); btn.type='button'; btn.className='opt'; btn.setAttribute('data-oi',opts[j]); btn.innerHTML='<span class="obadge">'+labels[j]+'</span><span>'+W[opts[j]].word+'</span>'; c.appendChild(btn); }
+}
+function handleMCQClick(e){
+  if(mDone) return; var btn=e.target;
+  while(btn && !btn.classList.contains('opt')){ btn=btn.parentNode; if(btn===document.getElementById('mcq-opts')) return; }
+  if(!btn||!btn.getAttribute('data-oi')) return; mDone=true;
+  var picked=parseInt(btn.getAttribute('data-oi'),10), correct=mOrder[mIdx];
+  var fb=document.getElementById('mcq-fb'); fb.style.display='block';
+  var allBtns=document.getElementById('mcq-opts').querySelectorAll('.opt'); for(var i=0;i<allBtns.length;i++) allBtns[i].disabled=true;
+  if(picked===correct){ btn.classList.add('ok'); mScore++; speak(W[correct].word); if(M[correct].mcq<3){M[correct].mcq++;saveM();} var cnt=M[correct].mcq; fb.className='fb ok'; fb.textContent=cnt>=3?'✅ Correct! ⭐ Star earned for "'+W[correct].word+'"!':'✅ Correct! ('+cnt+'/3 to earn ⭐)'; }
+  else { btn.classList.add('ng'); playBuzz(); for(var i=0;i<allBtns.length;i++){ if(parseInt(allBtns[i].getAttribute('data-oi'),10)===correct) allBtns[i].classList.add('ok'); } fb.className='fb ng'; fb.textContent='❌ The correct answer is "'+W[correct].word+'"'; }
+  document.getElementById('mcq-nxt').style.display='block';
+}
+function mcqNext(){ if(mIdx===mOrder.length-1){showComp('🎯','Quiz Complete!',mScore+' / '+mOrder.length+' correct',startMCQ);return;} mIdx++; renderMCQ(); }
+
+// TYPING
+var tOrder=[],tIdx=0,tScore=0,tDone=false;
+var tGroup=-1;
+function startTypingFiltered(grp){ tGroup=grp; tOrder=[]; for(var i=0;i<W.length;i++){ if(W[i].grp===grp) tOrder.push(i); } tOrder=shuffle(tOrder); tIdx=0; tScore=0; show('s-typ'); renderTyping(); }
+function startTyping(){ startTypingFiltered(tGroup); }
+function renderTyping(){
+  tDone=false; var wi=tOrder[tIdx];
+  document.getElementById('typ-ctr').textContent=(tIdx+1)+' / '+tOrder.length;
+  document.getElementById('typ-bar').style.width=(tIdx/tOrder.length*100)+'%';
+  document.getElementById('typ-uzb').textContent=W[wi].uzbek;
+  document.getElementById('typ-inp').value='';
+  document.getElementById('typ-fb').style.display='none'; document.getElementById('typ-fb').className='fb';
+  document.getElementById('typ-chk').style.display='block'; document.getElementById('typ-nxt').style.display='none';
+  setTimeout(function(){ document.getElementById('typ-inp').focus(); },100);
+}
+function levenshtein(a,b){ var m=a.length,n=b.length,d=[]; for(var i=0;i<=m;i++){d[i]=[i];} for(var j=0;j<=n;j++){d[0][j]=j;} for(var i=1;i<=m;i++) for(var j=1;j<=n;j++){ d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a.charAt(i-1)===b.charAt(j-1)?0:1)); } return d[m][n]; }
+function checkTyping(){
+  if(tDone) return; tDone=true; var wi=tOrder[tIdx];
+  var ans=document.getElementById('typ-inp').value.replace(/^\s+|\s+$/g,'').toLowerCase().replace(/-/g,' ').replace(/\s+/g,' ');
+  var correct=W[wi].word.toLowerCase().replace(/-/g,' ').replace(/\s+/g,' '); var dist=levenshtein(ans,correct); var ok=dist<=1;
+  var fb=document.getElementById('typ-fb'); fb.style.display='block';
+  if(ok){ tScore++; speak(W[wi].word); if(M[wi].typ<2){M[wi].typ++;saveM();} var cnt=M[wi].typ; var earned=cnt>=2;
+    if(dist===0){ fb.className='fb ok'; fb.textContent=earned?'✅ Correct! ⭐ Star earned for "'+W[wi].word+'"!':'✅ Correct! No mistakes! ('+cnt+'/2 to earn ⭐)'; }
+    else{ fb.className='fb warn'; fb.textContent=earned?'⚠️ Close enough! ⭐ Star earned for "'+W[wi].word+'"!':'⚠️ Close enough, but a small typo! The answer is "'+W[wi].word+'" ('+cnt+'/2 to earn ⭐)'; }
+  } else { playBuzz(); fb.className='fb ng'; fb.textContent='❌ Wrong or too many typos. The answer is "'+W[wi].word+'"'; }
+  document.getElementById('typ-chk').style.display='none'; document.getElementById('typ-nxt').style.display='block';
+}
+function typNext(){ if(tIdx===tOrder.length-1){showComp('⌨️','Typing Complete!',tScore+' / '+tOrder.length+' correct',startTyping);return;} tIdx++; renderTyping(); }
+
+function showComp(emoji,title,sub,againFn){
+  coCallback=againFn;
+  document.getElementById('co-emoji').textContent=emoji;
+  document.getElementById('co-title').textContent=title;
+  document.getElementById('co-sub').textContent=sub;
+  document.getElementById('co-score').textContent=totalStars()+' / '+(W.length*3)+' total ⭐';
+  document.getElementById('co-mast').textContent=masteredCount()+' / '+W.length;
+  document.getElementById('comp-ovl').classList.add('on');
+}
+function closeComp(){ document.getElementById('comp-ovl').classList.remove('on'); }
+
+function on(id,fn){ var el=document.getElementById(id); if(el) el.addEventListener('click',fn); }
+on('go-text',startText); on('go-mcq',function(){show('s-mcq-select');}); on('go-typ',function(){show('s-typ-select');}); on('rst-btn',resetAll);
+on('tog-btn',function(){ gridOpen=!gridOpen; document.getElementById('wg').classList.toggle('open',gridOpen); document.getElementById('tog-btn').textContent=(gridOpen?'▴':'▾')+' View word details'; });
+on('back-text',goHome); on('back-mcq',goHome); on('back-typ',goHome);
+on('co-home',goHome); on('co-again',function(){ if(coCallback) coCallback(); });
+on('pop-close',closePopup); on('pop-listen',function(){ if(pIdx!==null) speak(W[pIdx].word); });
+on('mcq-nxt',mcqNext); on('typ-chk',checkTyping); on('typ-nxt',typNext);
+
+document.getElementById('popup-ovl').addEventListener('click',closePopup);
+document.getElementById('pop-card').addEventListener('click',function(e){e.stopPropagation();});
+
+// Study mode word taps
+document.getElementById('study-area').addEventListener('touchstart',function(e){
+  var el=e.target; while(el&&el.id!=='study-area'){ if(el.classList&&el.classList.contains('wl-item')){ e.preventDefault(); showPopup(parseInt(el.getAttribute('data-idx'),10)); return; } el=el.parentNode; }
+},{passive:false});
+document.getElementById('study-area').addEventListener('click',function(e){
+  var el=e.target; while(el&&el.id!=='study-area'){ if(el.classList&&el.classList.contains('wl-item')){ showPopup(parseInt(el.getAttribute('data-idx'),10)); return; } el=el.parentNode; }
+});
+
+document.getElementById('mcq-opts').addEventListener('click',handleMCQClick);
+document.getElementById('typ-inp').addEventListener('keydown',function(e){ if(e.keyCode===13){ if(!tDone) checkTyping(); else typNext(); } });
+
+
+on('back-mcq-sel',goHome); on('back-typ-sel',goHome);
+on('mcq-u7',function(){startMCQFiltered(0);}); on('mcq-u10',function(){startMCQFiltered(1);});
+on('typ-u7',function(){startTypingFiltered(0);}); on('typ-u10',function(){startTypingFiltered(1);});
+
+try{ loadM(); }catch(e){}
+try{ updateHome(); }catch(e){}
+</script>
+</body>
+</html>
