@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word of the Day: Beautiful</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0f0e17;
+    --card: #1a1828;
+    --accent: #e8c547;
+    --accent2: #ff6b6b;
+    --accent3: #6bcbff;
+    --text: #fffffe;
+    --muted: #a7a9be;
+    --success: #4ecdc4;
+    --error: #ff6b6b;
+    --border: rgba(255,255,255,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  .header { text-align: center; margin-bottom: 32px; }
+  .header .label { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(38px, 10vw, 64px);
+    font-weight: 900; line-height: 1;
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header .phonetic { font-size: 16px; color: var(--muted); margin-top: 6px; }
+
+  .progress-wrap { background: var(--border); border-radius: 100px; height: 6px; margin-bottom: 8px; overflow: hidden; }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 100px; width: 0%;
+    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .progress-label { text-align: right; font-size: 12px; color: var(--muted); margin-bottom: 28px; }
+  .progress-label span { color: var(--accent); font-weight: 500; }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 28px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0; padding: 8px 18px; border-radius: 100px;
+    border: 1.5px solid var(--border); background: transparent;
+    color: var(--muted); font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: all 0.2s; white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .tab.active { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 700; }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .card { background: var(--card); border: 1.5px solid var(--border); border-radius: 20px; padding: 28px; margin-bottom: 16px; }
+
+  /* FLASHCARD */
+  .flashcard-wrap { perspective: 1000px; height: 260px; margin-bottom: 20px; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  .flashcard { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s ease; border-radius: 20px; }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .flashcard-front, .flashcard-back {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    border-radius: 20px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 28px; border: 1.5px solid var(--border);
+  }
+  .flashcard-front { background: linear-gradient(135deg, #1a1828, #201e35); }
+  .flashcard-back { background: linear-gradient(135deg, #1e2a1e, #1a2820); transform: rotateY(180deg); border-color: rgba(78,205,196,0.2); }
+  .fc-word { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+  .fc-hint { font-size: 12px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .fc-translation { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--success); margin-bottom: 8px; }
+  .fc-example { font-size: 14px; color: var(--muted); text-align: center; font-style: italic; margin-top: 8px; }
+  .fc-example em { color: var(--text); font-style: normal; font-weight: 500; }
+  .flip-hint { text-align: center; font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+  .speak-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(232,197,71,0.12); border: 1.5px solid rgba(232,197,71,0.3);
+    color: var(--accent); padding: 10px 20px; border-radius: 100px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    cursor: pointer; margin: 0 auto; touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* QUIZ */
+  .quiz-question { font-size: 18px; font-weight: 500; margin-bottom: 20px; line-height: 1.5; }
+  .quiz-question .hl { color: var(--accent); font-family: 'Playfair Display', serif; font-style: italic; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    padding: 14px 18px; border-radius: 12px; border: 1.5px solid var(--border);
+    background: transparent; color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 15px; text-align: left; cursor: pointer; transition: all 0.2s;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  }
+  .option.correct { border-color: var(--success); background: rgba(78,205,196,0.12); color: var(--success); }
+  .option.wrong { border-color: var(--error); background: rgba(255,107,107,0.12); color: var(--error); }
+  .option:disabled { cursor: default; opacity: 0.7; }
+
+  .feedback { margin-top: 16px; padding: 12px 16px; border-radius: 12px; font-size: 14px; display: none; }
+  .feedback.show { display: block; }
+  .feedback.correct { background: rgba(78,205,196,0.12); color: var(--success); border: 1px solid rgba(78,205,196,0.2); }
+  .feedback.wrong { background: rgba(255,107,107,0.12); color: var(--error); border: 1px solid rgba(255,107,107,0.2); }
+  .feedback.loading { background: rgba(255,255,255,0.04); color: var(--muted); border: 1px solid var(--border); }
+
+  /* FITB */
+  .fitb-sentence { font-size: 20px; line-height: 1.7; margin-bottom: 12px; }
+  .blank-input {
+    background: transparent; border: none; border-bottom: 2px solid var(--accent);
+    color: var(--accent); font-family: 'Playfair Display', serif; font-size: 20px;
+    width: 160px; text-align: center; outline: none; padding: 2px 4px;
+  }
+  .blank-input.correct { border-bottom-color: var(--success); color: var(--success); }
+  .blank-input.wrong { border-bottom-color: var(--error); color: var(--error); }
+  .fitb-hint { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  .fitb-hint span { color: var(--accent); }
+
+  /* TRANSLATION */
+  .trans-uz { font-size: 20px; color: var(--accent3); margin-bottom: 8px; font-weight: 500; }
+  .trans-note { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  .trans-input {
+    width: 100%; background: rgba(255,255,255,0.04); border: 1.5px solid var(--border);
+    border-radius: 12px; color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 16px; padding: 14px 16px; outline: none; resize: none; height: 90px;
+  }
+  .trans-input.correct { border-color: var(--success); }
+  .trans-input.wrong { border-color: var(--error); }
+
+  .offline-badge { display: none; background: rgba(255,107,107,0.12); border: 1px solid rgba(255,107,107,0.3); color: var(--error); padding: 8px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; }
+
+  .star-pop { font-size: 28px; display: inline-block; animation: starPop 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes starPop { from { transform: scale(0) rotate(-20deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 24px; border-radius: 100px; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+    cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  }
+  .btn-primary { background: var(--accent); color: var(--bg); }
+  .btn-secondary { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+  .btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="label">Word of the Day</div>
+    <h1>Beautiful</h1>
+    <div class="phonetic">/ˈbjuːtɪfəl/ &nbsp;·&nbsp; adjective</div>
+  </div>
+
+  <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="progress-label">Score: <span id="scoreDisplay">0</span> / <span id="totalDisplay">3</span></div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="flashcard">📖 Flashcard</button>
+    <button class="tab" data-tab="quiz">🧠 Quiz</button>
+    <button class="tab" data-tab="fitb">✏️ Fill in Blank</button>
+    <button class="tab" data-tab="translation">🌐 Translation</button>
+  </div>
+
+  <!-- FLASHCARD -->
+  <div class="screen active" id="screen-flashcard">
+    <div class="flashcard-wrap" id="flashcardWrap">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-front">
+          <div class="fc-word">beautiful</div>
+          <div class="fc-hint">tap to see translation</div>
+        </div>
+        <div class="flashcard-back">
+          <div class="fc-translation">chiroyli</div>
+          <div class="fc-example">"She has a <em>beautiful</em> smile."<br>
+            <span style="color:var(--muted);font-size:12px;display:block;margin-top:6px">"U juda chiroyli jilmayadi."</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flip-hint">👆 Tap card to flip</div>
+    <div class="card" style="margin-top:20px">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;letter-spacing:1px;text-transform:uppercase">Hear the pronunciation</p>
+      <button class="speak-btn" id="btnSpeakWord">🔊 Say it: <strong>beautiful</strong></button>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Also hear it in a sentence:</p>
+        <button class="speak-btn" id="btnSpeakSentence">🔊 Sentence example</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="screen-quiz">
+    <div class="card">
+      <div class="quiz-question">What does <span class="hl">"beautiful"</span> mean in Uzbek?</div>
+      <div class="options" id="opts1">
+        <button class="option" data-correct="false">qo'rqinchli</button>
+        <button class="option" data-correct="true">chiroyli</button>
+        <button class="option" data-correct="false">kichik</button>
+        <button class="option" data-correct="false">baland</button>
+      </div>
+      <div class="feedback" id="fb1"></div>
+      <div class="btn-row" id="q1next" style="display:none">
+        <button class="btn btn-primary" id="btnQ1Reset">Try Again 🔄</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="quiz-question">Which sentence uses <span class="hl">"beautiful"</span> correctly?</div>
+      <div class="options" id="opts2">
+        <button class="option" data-correct="false">The weather was very beautiful angry.</button>
+        <button class="option" data-correct="true">She wore a beautiful dress to the party.</button>
+        <button class="option" data-correct="false">He ran beautiful in the race.</button>
+        <button class="option" data-correct="false">Beautiful is he very tall.</button>
+      </div>
+      <div class="feedback" id="fb2"></div>
+    </div>
+  </div>
+
+  <!-- FILL IN BLANK -->
+  <div class="screen" id="screen-fitb">
+    <div class="card">
+      <p style="font-size:13px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:16px">Complete the sentence</p>
+      <div class="fitb-sentence">The garden is full of <input class="blank-input" id="fitb1" type="text" placeholder="______" autocomplete="off" autocorrect="off" spellcheck="false"> flowers.</div>
+      <div class="fitb-hint">Hint: opposite of ugly → <span>b _ _ _ _ _ _ _ _</span></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btnFitb1Check">Check ✓</button>
+        <button class="btn btn-secondary" id="btnFitb1Reset">Reset</button>
+      </div>
+      <div class="feedback" id="fb3"></div>
+    </div>
+    <div class="card">
+      <p style="font-size:13px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:16px">Complete the sentence</p>
+      <div class="fitb-sentence">What a <input class="blank-input" id="fitb2" type="text" placeholder="______" autocomplete="off" autocorrect="off" spellcheck="false"> day! The sky is clear and sunny.</div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btnFitb2Check">Check ✓</button>
+        <button class="btn btn-secondary" id="btnFitb2Reset">Reset</button>
+      </div>
+      <div class="feedback" id="fb4"></div>
+    </div>
+  </div>
+
+  <!-- TRANSLATION -->
+  <div class="screen" id="screen-translation">
+    <div class="card">
+      <p style="font-size:13px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:16px">Translate to English</p>
+      <div class="trans-uz">U juda chiroyli qiz.</div>
+      <div class="trans-note">📝 The word <strong style="color:var(--accent)">chiroyli</strong> = beautiful. Use it in your translation!</div>
+      <div class="offline-badge" id="offlineBadge">⚠️ No internet. AI check unavailable.</div>
+      <textarea class="trans-input" id="transInput" placeholder="Type your English translation here..."></textarea>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btnTransCheck">Check with AI 🤖</button>
+        <button class="btn btn-secondary" id="btnTransReset">Reset</button>
+      </div>
+      <div class="feedback" id="fb5"></div>
+    </div>
+    <div class="card" style="background:rgba(107,203,255,0.04);border-color:rgba(107,203,255,0.15)">
+      <p style="font-size:13px;color:var(--accent3);font-weight:600;margin-bottom:8px">💡 Vocabulary tip</p>
+      <p style="font-size:14px;color:var(--muted);line-height:1.6">
+        <strong style="color:var(--text)">Beautiful</strong> is an adjective. It comes before nouns:<br>
+        <em style="color:var(--accent3)">"a beautiful girl"</em> ✅ &nbsp; <em style="color:var(--error)">"a girl beautiful"</em> ❌
+      </p>
+    </div>
+  </div>
+
+</div>
+<script>
+var GROQ_KEY = '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';
+
+// SCORE
+var score = 0;
+var scored = { quiz: false, fitb: false, trans: false };
+document.getElementById('totalDisplay').textContent = '3';
+
+function addScore(key) {
+  if (!scored[key]) {
+    scored[key] = true;
+    score++;
+    document.getElementById('scoreDisplay').textContent = score;
+    document.getElementById('progressBar').style.width = (score / 3 * 100) + '%';
+  }
+}
+
+// TABS
+document.querySelectorAll('.tab').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var name = btn.getAttribute('data-tab');
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('screen-' + name).classList.add('active');
+  });
+});
+
+// SPEECH
+function speakText(text) {
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = 0.9;
+  function go() {
+    var voices = speechSynthesis.getVoices();
+    var v = voices.find(function(x) { return x.lang === 'en-US' && x.localService; })
+         || voices.find(function(x) { return x.lang === 'en-US'; })
+         || voices.find(function(x) { return x.lang.startsWith('en'); });
+    if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  }
+  speechSynthesis.getVoices().length ? go() : (speechSynthesis.onvoiceschanged = go);
+}
+document.getElementById('btnSpeakWord').addEventListener('click', function() { speakText('beautiful'); });
+document.getElementById('btnSpeakSentence').addEventListener('click', function() { speakText('The sunset was absolutely beautiful today.'); });
+
+// FLASHCARD
+document.getElementById('flashcardWrap').addEventListener('click', function() {
+  document.getElementById('flashcard').classList.toggle('flipped');
+});
+
+// QUIZ 1
+var q1done = false;
+document.querySelectorAll('#opts1 .option').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    if (q1done) return;
+    q1done = true;
+    var correct = btn.getAttribute('data-correct') === 'true';
+    document.querySelectorAll('#opts1 .option').forEach(function(o) { o.disabled = true; });
+    var fb = document.getElementById('fb1');
+    if (correct) {
+      btn.classList.add('correct');
+      fb.textContent = '✅ Correct! "Chiroyli" means beautiful in Uzbek.';
+      fb.className = 'feedback show correct';
+      addScore('quiz');
+    } else {
+      btn.classList.add('wrong');
+      document.querySelectorAll('#opts1 .option').forEach(function(o) {
+        if (o.getAttribute('data-correct') === 'true') o.classList.add('correct');
+      });
+      fb.textContent = '❌ Not quite. The correct answer is "chiroyli".';
+      fb.className = 'feedback show wrong';
+    }
+    document.getElementById('q1next').style.display = 'flex';
+  });
+});
+document.getElementById('btnQ1Reset').addEventListener('click', function() {
+  q1done = false;
+  document.querySelectorAll('#opts1 .option').forEach(function(o) { o.disabled = false; o.className = 'option'; });
+  document.getElementById('fb1').className = 'feedback';
+  document.getElementById('q1next').style.display = 'none';
+});
+
+// QUIZ 2
+var q2done = false;
+document.querySelectorAll('#opts2 .option').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    if (q2done) return;
+    q2done = true;
+    var correct = btn.getAttribute('data-correct') === 'true';
+    document.querySelectorAll('#opts2 .option').forEach(function(o) { o.disabled = true; });
+    var fb = document.getElementById('fb2');
+    if (correct) {
+      btn.classList.add('correct');
+      fb.textContent = '✅ Perfect! "Beautiful" is used correctly before a noun.';
+      fb.className = 'feedback show correct';
+    } else {
+      btn.classList.add('wrong');
+      document.querySelectorAll('#opts2 .option').forEach(function(o) {
+        if (o.getAttribute('data-correct') === 'true') o.classList.add('correct');
+      });
+      fb.textContent = '❌ "Beautiful" must describe a noun — like "a beautiful dress".';
+      fb.className = 'feedback show wrong';
+    }
+  });
+});
+
+// LEVENSHTEIN
+function lev(a, b) {
+  var d = [];
+  for (var i = 0; i <= a.length; i++) { d[i] = [i]; }
+  for (var j = 0; j <= b.length; j++) { d[0][j] = j; }
+  for (var i = 1; i <= a.length; i++)
+    for (var j = 1; j <= b.length; j++)
+      d[i][j] = a[i-1] === b[j-1] ? d[i-1][j-1] : 1 + Math.min(d[i-1][j], d[i][j-1], d[i-1][j-1]);
+  return d[a.length][b.length];
+}
+
+// FITB 1
+var f1done = false;
+document.getElementById('btnFitb1Check').addEventListener('click', function() {
+  if (f1done) return;
+  var inp = document.getElementById('fitb1');
+  var val = inp.value.trim().toLowerCase();
+  var fb = document.getElementById('fb3');
+  if (lev(val, 'beautiful') <= 2) {
+    inp.className = 'blank-input correct';
+    fb.textContent = val === 'beautiful' ? '✅ Perfect spelling!' : '✅ Close enough! Correct: "beautiful".';
+    fb.className = 'feedback show correct';
+    addScore('fitb'); f1done = true;
+  } else {
+    inp.className = 'blank-input wrong';
+    fb.textContent = '❌ The answer is "beautiful".';
+    fb.className = 'feedback show wrong';
+  }
+});
+document.getElementById('btnFitb1Reset').addEventListener('click', function() {
+  f1done = false;
+  var inp = document.getElementById('fitb1');
+  inp.value = ''; inp.className = 'blank-input';
+  document.getElementById('fb3').className = 'feedback';
+});
+
+// FITB 2
+document.getElementById('btnFitb2Check').addEventListener('click', function() {
+  var inp = document.getElementById('fitb2');
+  var val = inp.value.trim().toLowerCase();
+  var fb = document.getElementById('fb4');
+  if (lev(val, 'beautiful') <= 2) {
+    inp.className = 'blank-input correct';
+    fb.textContent = val === 'beautiful' ? '✅ Perfect!' : '✅ Almost! Correct: "beautiful".';
+    fb.className = 'feedback show correct';
+  } else {
+    inp.className = 'blank-input wrong';
+    fb.textContent = '❌ The answer is "beautiful".';
+    fb.className = 'feedback show wrong';
+  }
+});
+document.getElementById('btnFitb2Reset').addEventListener('click', function() {
+  var inp = document.getElementById('fitb2');
+  inp.value = ''; inp.className = 'blank-input';
+  document.getElementById('fb4').className = 'feedback';
+});
+
+// TRANSLATION
+var tChecking = false;
+var tDone = false;
+
+document.getElementById('btnTransCheck').addEventListener('click', function() {
+  if (tChecking || tDone) return;
+  var inp = document.getElementById('transInput');
+  var val = inp.value.trim();
+  var fb = document.getElementById('fb5');
+
+  if (!val) {
+    fb.textContent = '⚠️ Please type your translation first.';
+    fb.className = 'feedback show wrong';
+    return;
+  }
+  if (!navigator.onLine) {
+    document.getElementById('offlineBadge').style.display = 'block';
+    return;
+  }
+
+  tChecking = true;
+  fb.textContent = '🤖 AI is checking your answer...';
+  fb.className = 'feedback show loading';
+
+  var prompt = 'You are an English teacher checking an Uzbek student\'s translation.\n\n' +
+    'Uzbek sentence: "U juda chiroyli qiz."\n' +
+    'Target word: "beautiful" (chiroyli)\n' +
+    'Expected meaning: "She is a very beautiful girl."\n' +
+    'Student\'s answer: "' + val + '"\n\n' +
+    'Rules:\n- Accept synonyms: pretty, gorgeous, lovely, stunning\n' +
+    '- Ignore minor grammar/punctuation errors\n' +
+    '- Key word or synonym MUST be present\n' +
+    '- Be encouraging\n\n' +
+    'Reply ONLY with JSON, no markdown:\n{"correct":true,"feedback":"..."}';
+
+  fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 150,
+      temperature: 0.1
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.error) {
+      fb.textContent = '⚠️ ' + data.error.message;
+      fb.className = 'feedback show wrong';
+      tChecking = false;
+      return;
+    }
+    var raw = data.choices[0].message.content.replace(/```json|```/g,'').trim();
+    var result = JSON.parse(raw);
+    if (result.correct) {
+      inp.className = 'trans-input correct';
+      fb.innerHTML = '<span class="star-pop">⭐</span> ' + result.feedback;
+      fb.className = 'feedback show correct';
+      addScore('trans');
+      tDone = true;
+    } else {
+      inp.className = 'trans-input wrong';
+      fb.textContent = '❌ ' + result.feedback;
+      fb.className = 'feedback show wrong';
+    }
+    tChecking = false;
+  })
+  .catch(function(e) {
+    fb.textContent = '⚠️ ' + e.message;
+    fb.className = 'feedback show wrong';
+    tChecking = false;
+  });
+});
+
+document.getElementById('btnTransReset').addEventListener('click', function() {
+  document.getElementById('transInput').value = '';
+  document.getElementById('transInput').className = 'trans-input';
+  document.getElementById('fb5').className = 'feedback';
+  document.getElementById('offlineBadge').style.display = 'none';
+  tChecking = false; tDone = false;
+});
+
+window.addEventListener('offline', function() { document.getElementById('offlineBadge').style.display = 'block'; });
+window.addEventListener('online', function() { document.getElementById('offlineBadge').style.display = 'none'; });
+</script>
+</body>
+</html>
