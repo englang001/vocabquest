@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watch &amp; Learn — Film Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14111f;
+  --velvet:#211a35;
+  --velvet-2:#2c2344;
+  --marquee:#ffc45c;
+  --mint:#6fe3c4;
+  --rose:#ff7a95;
+  --paper:#f3ecdf;
+  --muted:#9c93b4;
+  --line:rgba(243,236,223,.14);
+  --r:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(1100px 500px at 15% -10%, #3a2b52 0%, transparent 60%),
+    radial-gradient(900px 400px at 90% 0%, #2a2350 0%, transparent 55%),
+    var(--ink);
+  color:var(--paper);
+  font-family:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1280px;margin:0 auto;padding:0 18px 80px}
+
+/* ---------- marquee header ---------- */
+header{padding:44px 0 24px;position:relative}
+.bulbs{display:flex;gap:9px;margin-bottom:20px}
+.bulbs i{width:7px;height:7px;border-radius:50%;background:var(--marquee);opacity:.35;animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1;box-shadow:0 0 10px var(--marquee)}}
+h1{
+  font-family:'Anton',Impact,sans-serif;
+  font-weight:400;
+  font-size:clamp(38px,7.5vw,76px);
+  line-height:.92;
+  letter-spacing:.01em;
+  margin:0;
+  text-transform:uppercase;
+}
+h1 em{font-style:normal;color:var(--marquee)}
+.tagline{color:var(--muted);max-width:52ch;margin:14px 0 0;font-size:15px;line-height:1.55}
+
+/* ---------- controls ---------- */
+.controls{
+  position:sticky;top:0;z-index:40;
+  background:rgba(20,17,31,.86);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+  margin:26px -18px 0;padding:14px 18px;
+}
+.ctl-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.search{
+  flex:1 1 240px;min-width:0;
+  background:var(--velvet);border:1px solid var(--line);color:var(--paper);
+  padding:11px 14px;border-radius:10px;font:inherit;font-size:15px;
+}
+.search::placeholder{color:var(--muted)}
+.search:focus{outline:2px solid var(--marquee);outline-offset:1px}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{
+  background:transparent;border:1px solid var(--line);color:var(--muted);
+  padding:8px 13px;border-radius:999px;cursor:pointer;
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:500;
+  letter-spacing:.04em;text-transform:uppercase;transition:.15s;
+}
+.chip:hover{color:var(--paper);border-color:rgba(243,236,223,.35)}
+.chip[aria-pressed="true"]{background:var(--marquee);border-color:var(--marquee);color:#1a1408;font-weight:700}
+.chip:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+.btn-ghost{
+  background:transparent;border:1px solid var(--line);color:var(--paper);
+  padding:9px 14px;border-radius:10px;cursor:pointer;font:inherit;font-size:14px;
+}
+.btn-ghost:hover{border-color:var(--marquee);color:var(--marquee)}
+.meta-row{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  margin-top:11px;font-family:'JetBrains Mono',monospace;font-size:11.5px;
+  color:var(--muted);letter-spacing:.05em;text-transform:uppercase;flex-wrap:wrap;
+}
+
+/* ---------- grid ---------- */
+.grid{
+  display:grid;gap:22px 18px;margin-top:30px;
+  grid-template-columns:repeat(auto-fill,minmax(168px,1fr));
+}
+.card{display:flex;flex-direction:column;min-width:0}
+.frame{
+  position:relative;aspect-ratio:2/3;border-radius:var(--r);overflow:hidden;
+  background:var(--velvet);border:1px solid var(--line);
+  cursor:pointer;transition:transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s;
+}
+.frame:hover{transform:translateY(-5px);box-shadow:0 14px 34px rgba(0,0,0,.5)}
+.frame:focus-visible{outline:2px solid var(--marquee);outline-offset:3px}
+.frame img.art{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  display:block;opacity:0;transition:opacity .4s ease;z-index:1;
+}
+.frame img.art.on{opacity:1}
+
+/* generated fallback poster */
+.gen{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:16px 14px 18px}
+.gen::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:34px;
+  background-image:radial-gradient(circle at 6px 0, transparent 5px, var(--ink) 5.5px);
+  background-size:12px 12px;background-position:0 -6px;opacity:.9;
+}
+.gen-title{
+  font-family:'Anton',Impact,sans-serif;text-transform:uppercase;
+  font-size:19px;line-height:1.02;letter-spacing:.01em;
+  color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.45);word-break:break-word;
+}
+.gen-year{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,.72);margin-top:7px;letter-spacing:.1em}
+
+.lvl{
+  position:absolute;top:9px;left:9px;z-index:2;
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;
+  padding:4px 8px;border-radius:6px;letter-spacing:.06em;
+  background:#111;color:#fff;backdrop-filter:blur(4px);
+}
+.lvl.a2{background:var(--mint);color:#08281f}
+.lvl.b1{background:var(--marquee);color:#231a06}
+.lvl.b2{background:var(--rose);color:#2c0713}
+.badge-series{
+  position:absolute;top:9px;right:9px;z-index:2;
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;
+  background:rgba(12,10,20,.82);color:var(--paper);padding:4px 7px;border-radius:6px;
+}
+.play{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(to top,rgba(10,8,16,.9),rgba(10,8,16,.05) 55%);
+  opacity:0;transition:opacity .2s;
+}
+.frame:hover .play,.frame:focus-visible .play{opacity:1}
+.play span{
+  border:1.5px solid var(--marquee);color:var(--marquee);border-radius:999px;
+  padding:9px 20px;font-family:'JetBrains Mono',monospace;font-size:12px;
+  letter-spacing:.08em;text-transform:uppercase;background:rgba(20,17,31,.5);
+}
+.info{padding:11px 2px 0}
+.title{font-size:14.5px;font-weight:700;line-height:1.28;margin:0}
+.sub{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin:5px 0 0}
+.note{font-size:12.5px;color:var(--muted);line-height:1.45;margin:7px 0 0}
+.watch{
+  display:block;width:100%;margin-top:10px;text-align:center;text-decoration:none;
+  background:var(--velvet-2);border:1px solid var(--line);color:var(--paper);
+  padding:9px;border-radius:9px;font-size:13px;font-weight:500;transition:.15s;
+}
+.watch:hover{background:var(--marquee);color:#1a1408;border-color:var(--marquee)}
+.watch:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+
+/* ---------- panel ---------- */
+.panel{
+  margin-top:20px;background:var(--velvet);border:1px solid var(--line);
+  border-radius:var(--r);padding:18px;display:none;
+}
+.panel.open{display:block}
+.panel h3{margin:0 0 8px;font-size:15px}
+.panel p{color:var(--muted);font-size:13.5px;line-height:1.6;margin:0 0 12px}
+.panel code{font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(0,0,0,.3);padding:2px 6px;border-radius:5px;color:var(--mint)}
+.panel-row{display:flex;gap:9px;flex-wrap:wrap}
+.panel input{
+  flex:1 1 220px;background:var(--ink);border:1px solid var(--line);color:var(--paper);
+  padding:10px 12px;border-radius:9px;font:inherit;font-size:14px;
+}
+.status{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mint);margin-top:10px;min-height:16px}
+.empty{text-align:center;padding:70px 20px;color:var(--muted)}
+.empty strong{display:block;font-family:'Anton',sans-serif;font-size:26px;color:var(--paper);text-transform:uppercase;margin-bottom:8px}
+footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;line-height:1.6}
+
+@media (max-width:520px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:18px 12px}
+  .note{display:none}
+  header{padding:30px 0 16px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="bulbs" aria-hidden="true"></div>
+  <h1>Watch &amp; <em>Learn</em></h1>
+  <p class="tagline">Every film is tagged with the English level you need to enjoy it without subtitles in your own language. Start below your level, not above it — you should understand about 80% without stopping.</p>
+</header>
+
+<div class="controls">
+  <div class="ctl-row">
+    <input class="search" id="q" type="search" placeholder="Search a title…" aria-label="Search titles">
+    <div class="chips" id="cats" role="group" aria-label="Type"></div>
+    <div class="chips" id="lvls" role="group" aria-label="Level"></div>
+    <button class="btn-ghost" id="lucky">Pick one for me</button>
+    <button class="btn-ghost" id="cog" aria-expanded="false">Posters</button>
+  </div>
+  <div class="meta-row">
+    <span id="count"></span>
+    <span>A2 = easy listening · B1 = normal speed · B2 = fast, slang, accents</span>
+  </div>
+</div>
+
+<div class="panel" id="panel">
+  <h3>Posters</h3>
+  <p>
+    Posters load themselves from Wikipedia as you scroll — no key, no setup, no files to add.
+    Each one is remembered in your browser, so the page is instant the second time.<br><br>
+    Want sharper artwork and a higher hit rate? Paste a free TMDB v3 key and it will be used first.
+    To make it permanent for your students, put the key in the <code>TMDB_KEY</code> line near the top of this file.
+  </p>
+  <div class="panel-row">
+    <input id="key" type="password" placeholder="TMDB v3 key (optional)" autocomplete="off">
+    <button class="btn-ghost" id="apply">Use this key</button>
+    <button class="btn-ghost" id="test">Run a check</button>
+    <button class="btn-ghost" id="clear">Clear saved posters</button>
+  </div>
+  <div class="status" id="status"></div>
+</div>
+
+<div class="grid" id="grid"></div>
+<div class="empty" id="empty" hidden><strong>Nothing here</strong>Try a different level or clear the search.</div>
+
+<footer>
+  Tip for students: watch each film <strong>twice</strong>. First time with English subtitles to enjoy the story, second time with no subtitles a week later. Write down five new expressions each time — not single words.
+</footer>
+
+</div>
+
+<script>
+/* ============================================================
+   POSTERS — loaded automatically from the internet.
+   Nothing to configure. Wikipedia needs no key and no signup.
+   Optional: paste a free TMDB v3 key below for better artwork.
+   ============================================================ */
+let TMDB_KEY = "";
+
+const CAT = { cm:'Cartoon film', cs:'Cartoon series', lm:'Live action film', ls:'Live action series' };
+
+const DATA = [
+/* --- cartoon films --- */
+["Shrek",2001,"films/307-shrek-2001","cm","B2","Almost every joke is wordplay or an idiom. Great for L3+, frustrating below."],
+["Zootopia",2016,"films/716-zootopia-2016","cm","B2","Fast, dense dialogue and adult humour. Excellent for discussion about stereotypes."],
+["Tangled",2010,"films/386-tangled-2010","cm","B1","Clear speech, simple story, useful everyday verbs."],
+["Inside Out",2015,"films/209-inside-out-2015","cm","B1","The best film here for emotion vocabulary. Pair it with a feelings lesson."],
+["Frozen",2013,"films/170-frozen-2013","cm","B1","Simple dialogue, and students already know the songs by heart."],
+["Kung Fu Panda",2008,"films/471-kung-fu-panda-2008","cm","B1","Clear American speech, short sentences, lots of repetition."],
+["Ratatouille",2007,"films/326-ratatouille-2007","cm","B2","French accents plus food and cooking vocabulary. Beautiful but demanding."],
+["Coco",2017,"films/127-coco-2017","cm","B1","Family vocabulary and a strong emotional story. Some Spanish mixed in."],
+["Cars",2006,"films/117-cars-2006","cm","A2","Slow, simple, very repetitive. Good first film for a Level 1 group."],
+["Moana",2016,"films/691-moana-2016","cm","B1","Clear speech with strong songs. Themes of courage and leaving home."],
+["Finding Nemo",2003,"films/464-finding-nemo-2003","cm","A2","Short sentences, clear voices, plenty of visual context."],
+["How to Train Your Dragon",2010,"films/196-how-to-train-your-dragon-2010","cm","B1","The adults have thick Scottish accents; the teenagers are easy to follow."],
+["The Grinch",2018,"films/2200-the-grinch-2018","cm","A2","Gentle narration and simple dialogue. Good for December."],
+["The Lion King",1994,"films/420-the-lion-king-1994","cm","B1","Very clear pronunciation. A classic worth using for a whole unit."],
+["Madagascar",2005,"films/238-madagascar-2005","cm","B2","Fast New York slang. Funny, but hard without subtitles."],
+["Mulan",1998,"films/257-mulan-1998","cm","B1","Clear speech and a story students connect with. Duty vs personal choice."],
+["Up",2009,"films/450-up-2009","cm","B1","The first ten minutes have no dialogue — perfect for a narration task."],
+["Hotel Transylvania",2012,"films/776-hotel-transylvania-2012","cm","B1","Fast delivery but very visual. Teen-friendly."],
+["Toy Story",1995,"films/447-toy-story-1995","cm","A2","Short lines, clear voices. Safe for Level 1."],
+["Despicable Me",2010,"films/477-despicable-me-2010","cm","A2","Simple dialogue and a lot of physical comedy."],
+["Monsters, Inc.",2001,"films/251-monsters-inc-2001","cm","B1","Workplace vocabulary in a silly setting. Clear and fun."],
+["The Princess and the Frog",2009,"films/619-the-princess-and-the-frog-2009","cm","B2","Heavy Southern and Creole accents. Hard listening."],
+["Anastasia",1997,"films/71-anastasia-1997","cm","B1","Clear speech, and the history connects to this region."],
+["Beauty and the Beast",1991,"films/97-beauty-and-the-beast-1991","cm","B1","Clear, slightly formal English. Good for reported speech work."],
+["Rio",2011,"films/328-rio-2011","cm","B1","Mixed accents, but the story is easy to follow."],
+["Ice Age",2002,"films/198-ice-age-2002","cm","A2","Very little dialogue and a lot of visual comedy."],
+["Brave",2012,"films/139-brave-2012","cm","B2","Thick Scottish accents throughout. Only for confident listeners."],
+["The Incredibles",2004,"films/463-the-incredibles-2004","cm","B1","Natural family arguments — great model of real spoken English."],
+["Hercules",1997,"films/890-hercules-1997","cm","B2","Fast narration and mythology references. Vocabulary-heavy."],
+["Aladdin",1992,"films/69-aladdin-1992","cm","B2","The Genie speaks extremely fast with cultural jokes. Everything else is B1."],
+["The Little Mermaid",1989,"films/421-the-little-mermaid-1989","cm","A2","Simple, slow, song-driven."],
+["Atlantis: The Lost Empire",2001,"films/697-atlantis-the-lost-empire-2001","cm","B2","Academic and technical vocabulary. Unusual and underrated."],
+["The Secret Life of Pets",2016,"films/835-the-secret-life-of-pets-2016","cm","B1","Simple sentences and a very visual plot."],
+["Spirited Away",2001,"films/375-spirited-away-2001","cm","B1","Slow pace with long silences. The English dub is easy to follow."],
+["Penguins of Madagascar",2014,"films/142-penguins-of-madagascar-2014","cm","B2","Rapid-fire puns. Entertaining but hard."],
+["That Christmas",2024,"films/4751-that-christmas-2024","cm","B1","British accents at a comfortable speed."],
+["The Boss Baby",2017,"films/1707-the-boss-baby-2017","cm","B1","Business vocabulary played for jokes. Fast in places."],
+["Puss in Boots",2011,"films/606-puss-in-boots-2011","cm","B1","Clear speech with a strong Spanish accent from the lead."],
+["Big Hero 6",2014,"films/465-big-hero-6-2014","cm","B1","Technology and science vocabulary. Popular with teenage boys."],
+["Rise of the Guardians",2012,"films/847-rise-of-the-guardians-2012","cm","B1","Mixed accents but clear delivery."],
+["Sing",2016,"films/1006-sing-2016","cm","A2","Music-driven with short dialogue scenes."],
+["Cinderella",1949,"films/124-cinderella-1949","cm","A2","Very slow, very clear old-fashioned speech."],
+["Ralph Breaks the Internet",2018,"films/297-ralph-breaks-the-internet-2018","cm","B1","Internet vocabulary students already know in their own language."],
+["Lady and the Tramp",1955,"films/226-lady-and-the-tramp-1955","cm","A2","Slow and clear. Little dialogue."],
+["Alice in Wonderland",1951,"films/68-alice-in-wonderland-1951","cm","B2","Nonsense wordplay that confuses even strong students."],
+["Minions",2015,"films/1636-minions-2015","cm","A2","Warning: the Minions speak invented gibberish. Very little real English."],
+["Sinbad: Legend of the Seven Seas",2003,"films/621-sinbad-legend-of-the-seven-seas-2003","cm","B1","Adventure vocabulary at a steady pace."],
+["The Emperor's New Groove",2000,"films/634-the-emperor-s-new-groove-2000","cm","B2","Fast sarcasm and slang. Hilarious but only for L4-5."],
+["Surf's Up",2007,"films/1274-surfs-up-2007","cm","B2","Mockumentary style with surfer slang and overlapping speech."],
+["Snow White and the Seven Dwarfs",1937,"films/366-snow-white-and-the-seven-dwarfs-1937","cm","A2","The slowest, clearest English in the whole collection."],
+["Onward",2019,"films/567-onward-2019","cm","B1","Natural brother dialogue. Modern conversational English."],
+["Rango",2011,"films/140-rango-2011","cm","B2","The hardest film here — Western slang and mumbled delivery. Skip for class."],
+["One Hundred and One Dalmatians",1961,"films/269-one-hundred-and-one-dalmatians-1961","cm","A2","Clear British English at a gentle pace."],
+["Treasure Planet",2002,"films/608-treasure-planet-2002","cm","B2","Nautical and sci-fi vocabulary mixed together."],
+["The Croods",2013,"films/766-the-croods-2013","cm","B1","Simple sentences and heavy visual comedy."],
+["Megamind",2010,"films/1144-megamind-2010","cm","B2","Built on sarcasm and mispronunciation jokes."],
+["Peter Pan",1952,"films/2400-peter-pan-1952","cm","A2","Slow, clear, old-fashioned British English."],
+["Balto",1995,"films/96-balto-1995","cm","B1","Simple dialogue and a strong survival story."],
+["Robin Hood",1973,"films/327-robin-hood-1973","cm","B1","Clear speech with light British accents."],
+["The Angry Birds Movie",2016,"films/1275-the-angry-birds-movie-2016","cm","B1","Short lines and simple humour."],
+["The Addams Family",2019,"films/467-the-addams-family-2019","cm","B1","Dry humour that needs some cultural background."],
+["Bee Movie",2007,"films/1320-bee-movie-2007","cm","B2","Puns and courtroom vocabulary. Very talky."],
+["Brother Bear",2003,"films/295-brother-bear-2003","cm","B1","Clear speech and an emotional story."],
+["Cloudy with a Chance of Meatballs",2009,"films/126-cloudy-with-a-chance-of-meatballs-2009","cm","B2","Fast delivery packed with invented science words."],
+["Shark Tale",2004,"films/1205-shark-tale-2004","cm","B2","Heavy New York slang and pop-culture references."],
+["Robots",2005,"films/1720-robots-2005","cm","B1","Clear speech with a lot of mechanical vocabulary."],
+["Open Season",2006,"films/2450-open-season-2006","cm","B1","Fast comedy but a simple plot."],
+["The Fox and the Hound",1981,"films/405-the-fox-and-the-hound-1981","cm","A2","Slow and clear. Good for friendship vocabulary."],
+["Over the Hedge",2006,"films/607-over-the-hedge-2006","cm","B1","Snappy comic timing. Food and suburb vocabulary."],
+["Turbo",2013,"films/280-turbo-2013","cm","B1","Racing vocabulary and simple motivational dialogue."],
+["Chicken Little",2005,"films/1295-chicken-little-2005","cm","B1","Fast in places but short and simple overall."],
+["The Adventures of Tintin",2011,"films/938-the-adventures-of-tintin-2011","cm","B2","British accents plus mumbling from one main character."],
+["Gnomeo & Juliet",2011,"films/1733-gnomeo-and-juliet-2011","cm","B2","Full of Shakespeare references students will miss without setup."],
+["The Rescuers",1977,"films/46-the-rescuers-1977","cm","A2","Gentle pace and simple dialogue."],
+/* --- cartoon series --- */
+["Gravity Falls",2012,"series/491-gravity-falls-2012","cs","B2","Fast and pun-heavy, but 22-minute episodes make it ideal weekly homework."],
+["Avatar: The Last Airbender",2004,"series/486-avatar-last-airbender-2004","cs","B1","The best long-term series here. Clear speech, serious themes, 61 episodes."],
+["Dream Productions",2024,"series/4762-dream-productions-2024","cs","B1","Short episodes in an office-comedy style."],
+["DuckTales",1987,"series/1540-ducktales-1987","cs","B1","Classic adventure episodes with clear voices."],
+["Cars on the Road",2022,"series/2537-cars-on-the-road-2022","cs","A2","Nine-minute episodes. Perfect low-pressure daily listening."],
+["Kung Fu Panda: The Paws of Destiny",2018,"series/1536-kung-fu-panda-paws-of-destiny-2018","cs","B1","Simple episodic plots with clear delivery."],
+/* --- live action films --- */
+["Home Alone",1990,"films/190-home-alone-1990","lm","B1","Clear speech and physical comedy. Almost every student enjoys it."],
+["The Chronicles of Narnia: The Lion, the Witch and the Wardrobe",2005,"films/627-the-chronicles-of-narnia-the-lion-the-witch-and-the-wardrobe-2005","lm","B2","Formal British English. Good preparation for academic listening."],
+["The Princess Diaries",2001,"films/439-the-princess-diaries-2001","lm","B1","Real teenage conversation. Strong choice for a school-age group."],
+["The Parent Trap",1998,"films/566-the-parent-trap-1998","lm","B2","One actress plays British and American — a perfect accent comparison lesson."],
+["How the Grinch Stole Christmas",2000,"films/2199-how-the-grinch-stole-christmas-2000","lm","B2","Jim Carrey improvises at extreme speed. Hard listening."],
+["Maleficent",2014,"films/243-maleficent-2014","lm","B2","Formal narration and literary vocabulary."],
+["Diary of a Wimpy Kid",2010,"films/2511-diary-of-a-wimpy-kid-2010","lm","B1","School vocabulary and teenage narration. Very relatable for your age group."],
+["Alvin and the Chipmunks",2007,"films/645-alvin-and-the-chipmunks-2007","lm","B1","The high-pitched voices are genuinely hard to decode. Subtitles needed."],
+["Garfield",2004,"films/688-garfield-2004","lm","B1","Short, simple, and driven by sarcastic one-liners."],
+["Night at the Museum",2006,"films/1489-night-at-the-museum-2006","lm","B2","History and culture vocabulary. Good springboard for research tasks."],
+["Real Steel",2011,"films/61-real-steel-2011","lm","B2","Mumbled American delivery and sports slang."],
+["Bridge to Terabithia",2006,"films/740-bridge-to-terabithia-2006","lm","B1","Clear speech, but the ending is genuinely upsetting. Warn the class."],
+["Jumanji",1995,"films/2010-jumanji-1995","lm","B1","Steady pace and a plot that carries the language."],
+["Percy Jackson & the Olympians: The Lightning Thief",2010,"films/1514-percy-jackson-and-the-olympians-the-lightning-thief-2010","lm","B2","Mythology vocabulary and fast teenage dialogue."],
+["Matilda",1996,"films/2269-matilda-1996","lm","B1","Books, school and reading — an easy sell for a language class."],
+["A Series of Unfortunate Events",2004,"films/2127-a-series-of-unfortunate-events-2004","lm","B2","The narrator stops to define difficult words. Unusually useful for vocabulary."],
+["Oz the Great and Powerful",2013,"films/342-oz-the-great-and-powerful-2013","lm","B2","Theatrical, slightly old-fashioned speech."],
+["Ella Enchanted",2004,"films/4502-ella-enchanted-2004","lm","B1","Light fantasy comedy with clear delivery."],
+["Enchanted",2007,"films/4503-enchanted-2007","lm","B1","Mixes cartoon and real world. Clear and cheerful."],
+["Nanny McPhee",2005,"films/1017-nanny-mcphee-2005","lm","B2","British accents and slightly formal vocabulary."],
+["Mirror Mirror",2012,"films/857-mirror-mirror-2012","lm","B1","Clear speech with a light comic tone."],
+["Journey to the Center of the Earth",2008,"films/954-journey-to-the-center-of-the-earth-2008","lm","B1","Science vocabulary in a simple adventure plot."],
+["Dolittle",2020,"films/966-dolittle-2020","lm","B2","The lead mumbles behind a strange accent. Difficult listening."],
+["The Sorcerer's Apprentice",2010,"films/1511-the-sorcerer-s-apprentice-2010","lm","B1","Modern conversational English at a normal speed."],
+["Mr. Popper's Penguins",2011,"films/949-mr-popper-s-penguins-2011","lm","B1","Simple family comedy. Easy to follow."],
+["Tomorrowland",2015,"films/1852-tomorrowland-2015","lm","B2","Abstract ideas about the future. Talky and demanding."],
+["The Spiderwick Chronicles",2008,"films/4509-the-spiderwick-chronicles-2008","lm","B1","Fast in places, but visually clear."],
+["Space Jam",1996,"films/1706-space-jam-1996","lm","B2","Basketball slang and 90s references."],
+["The Golden Compass",2007,"films/1513-the-golden-compass-2007","lm","B2","Invented vocabulary plus formal British English. The toughest live-action one."],
+["Honey, I Shrunk the Kids",1989,"films/2311-honey-i-shrunk-the-kids-1989","lm","B1","Clear family dialogue and a simple plot."],
+/* --- live action series --- */
+["The 10th Kingdom",2000,"series/1192-the-10th-kingdom","ls","B2","Long, British, and language-rich. A project for your strongest group."]
+];
+
+const BASE = "https://inoriginal.cc/";
+const items = DATA.map(([title,year,path,cat,level,note])=>{
+  const seg = path.split("/")[1].replace(/^\d+-/,"");
+  return {title,year,cat,level,note,url:BASE+path+".html",slug:seg};
+});
+
+/* ---------- generated poster ---------- */
+const PALETTES=[["#2b1f4d","#7b4bb5"],["#0f3a3a","#2f9e8f"],["#4a1e2b","#c0566f"],["#3a2a12","#c08a3a"],["#12263f","#3d7ab8"],["#341838","#9a4f8f"],["#1d3320","#5a9e5a"],["#3b1f1f","#a8563c"]];
+function hash(s){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h}
+function genPoster(it){
+  const [a,b]=PALETTES[hash(it.title)%PALETTES.length];
+  const angle=(hash(it.slug)%60)+120;
+  return `<div class="gen" style="background:linear-gradient(${angle}deg,${a},${b})">
+    <div class="gen-title">${esc(it.title)}</div>
+    <div class="gen-year">${it.year}</div>
+  </div>`;
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+/* ---------- render ---------- */
+const grid=document.getElementById("grid");
+const empty=document.getElementById("empty");
+const countEl=document.getElementById("count");
+let fCat="all", fLvl="all", fQ="";
+
+/* ---------- poster fetching ---------- */
+const BY_SLUG = Object.fromEntries(items.map(i=>[i.slug,i]));
+
+const cache = (()=>{
+  let store = {};
+  try{ store = JSON.parse(localStorage.getItem("posterCache")||"{}") }catch(e){}
+  const save = ()=>{ try{ localStorage.setItem("posterCache",JSON.stringify(store)) }catch(e){} };
+  return {
+    get:k=>store[k],
+    set:(k,v)=>{ store[k]=v; save() },
+    wipe:()=>{ store={}; save() },
+    size:()=>Object.values(store).filter(Boolean).length
+  };
+})();
+
+async function fromWikipedia(it){
+  const kind = it.cat.endsWith("s") ? "TV series" : "film";
+  const q = `${it.title} ${it.year} ${kind}`;
+  const u = "https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*"
+          + "&generator=search&gsrlimit=1&gsrsearch=" + encodeURIComponent(q)
+          + "&prop=pageimages&piprop=thumbnail&pithumbsize=500";
+  const j = await (await fetch(u)).json();
+  const pages = j.query && j.query.pages;
+  if(!pages) return null;
+  const page = Object.values(pages)[0];
+  return page && page.thumbnail ? page.thumbnail.source : null;
+}
+
+async function fromTMDB(it){
+  const kind = it.cat.endsWith("s") ? "tv" : "movie";
+  const yr = kind === "movie" ? "year" : "first_air_date_year";
+  const u = `https://api.themoviedb.org/3/search/${kind}?api_key=${TMDB_KEY}`
+          + `&query=${encodeURIComponent(it.title)}&${yr}=${it.year}`;
+  const j = await (await fetch(u)).json();
+  const hit = j.results && j.results[0];
+  return hit && hit.poster_path ? "https://image.tmdb.org/t/p/w500"+hit.poster_path : null;
+}
+
+async function fromWikipediaREST(it){
+  const series = it.cat.endsWith("s");
+  const cands = series
+    ? [`${it.title} (TV series)`, `${it.title} (${it.year} TV series)`, it.title]
+    : [`${it.title} (${it.year} film)`, `${it.title} (film)`, it.title];
+  for(const c of cands){
+    try{
+      const r = await fetch("https://en.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(c.replace(/ /g,"_")));
+      if(!r.ok) continue;
+      const j = await r.json();
+      if(j.thumbnail && j.thumbnail.source) return j.thumbnail.source.replace(/\/\d+px-/,"/500px-");
+    }catch(e){}
+  }
+  return null;
+}
+
+let inflight = 0; const queue = [];
+function pump(){
+  while(inflight < 4 && queue.length){
+    const job = queue.shift();
+    inflight++;
+    job().catch(()=>{}).finally(()=>{ inflight--; pump() });
+  }
+}
+function paint(frame,url){
+  const img = frame.querySelector("img.art");
+  if(!img) return;
+  img.onload = ()=>img.classList.add("on");
+  img.src = url;
+}
+function requestPoster(frame){
+  const it = BY_SLUG[frame.dataset.slug];
+  if(!it) return;
+  const seen = cache.get(it.slug);
+  if(seen){ paint(frame,seen); return }
+  if(seen === null) return;               // already searched, nothing found
+  queue.push(async()=>{
+    let url = null;
+    if(TMDB_KEY){ try{ url = await fromTMDB(it) }catch(e){} }
+    if(!url){ try{ url = await fromWikipedia(it) }catch(e){} }
+    if(!url){ try{ url = await fromWikipediaREST(it) }catch(e){} }
+    cache.set(it.slug, url || null);
+    if(url) paint(frame,url);
+  });
+  pump();
+}
+
+const io = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){ io.unobserve(e.target); requestPoster(e.target) }
+  });
+},{ rootMargin:"500px 0px" });
+
+function render(){
+  const list=items.filter(it=>
+    (fCat==="all"||it.cat===fCat) &&
+    (fLvl==="all"||it.level===fLvl) &&
+    (!fQ||it.title.toLowerCase().includes(fQ))
+  );
+  countEl.textContent = list.length+" of "+items.length+" titles";
+  empty.hidden = list.length>0;
+  grid.innerHTML = list.map(it=>`
+    <article class="card">
+      <div class="frame" role="link" tabindex="0" data-url="${it.url}" data-slug="${it.slug}" aria-label="Watch ${esc(it.title)}">
+        <span class="lvl ${it.level.toLowerCase()}">${it.level}</span>
+        ${it.cat.endsWith("s")?'<span class="badge-series">SERIES</span>':''}
+        ${genPoster(it)}
+        <img class="art" alt="" decoding="async">
+        <div class="play"><span>Watch</span></div>
+      </div>
+      <div class="info">
+        <h2 class="title">${esc(it.title)}</h2>
+        <p class="sub">${it.year} · ${CAT[it.cat]}</p>
+        <p class="note">${esc(it.note)}</p>
+        <a class="watch" href="${it.url}" target="_blank" rel="noopener">Watch</a>
+      </div>
+    </article>`).join("");
+  grid.querySelectorAll(".frame").forEach(f=>{
+    const seen = cache.get(f.dataset.slug);
+    if(seen) paint(f,seen); else if(seen !== null) io.observe(f);
+  });
+}
+
+grid.addEventListener("click",e=>{
+  const f=e.target.closest(".frame"); if(f) window.open(f.dataset.url,"_blank","noopener");
+});
+grid.addEventListener("keydown",e=>{
+  if(e.key!=="Enter"&&e.key!==" ")return;
+  const f=e.target.closest(".frame"); if(f){e.preventDefault();window.open(f.dataset.url,"_blank","noopener")}
+});
+
+/* ---------- filters ---------- */
+function chipset(el,opts,cb){
+  el.innerHTML=opts.map(([v,l],i)=>`<button class="chip" data-v="${v}" aria-pressed="${i===0}">${l}</button>`).join("");
+  el.addEventListener("click",e=>{
+    const b=e.target.closest(".chip"); if(!b)return;
+    [...el.children].forEach(c=>c.setAttribute("aria-pressed",c===b));
+    cb(b.dataset.v);
+  });
+}
+chipset(document.getElementById("cats"),[["all","All"],["cm","Cartoons"],["lm","Live action"],["cs","Cartoon series"],["ls","Live series"]],v=>{fCat=v;render()});
+chipset(document.getElementById("lvls"),[["all","Any level"],["A2","A2"],["B1","B1"],["B2","B2"]],v=>{fLvl=v;render()});
+document.getElementById("q").addEventListener("input",e=>{fQ=e.target.value.toLowerCase().trim();render()});
+
+document.getElementById("lucky").addEventListener("click",()=>{
+  const pool=items.filter(it=>(fCat==="all"||it.cat===fCat)&&(fLvl==="all"||it.level===fLvl));
+  if(!pool.length)return;
+  const pick=pool[Math.floor(Math.random()*pool.length)];
+  document.getElementById("q").value=pick.title; fQ=pick.title.toLowerCase(); render();
+  window.scrollTo({top:document.querySelector(".grid").offsetTop-120,behavior:"smooth"});
+});
+
+/* ---------- poster panel ---------- */
+const panel=document.getElementById("panel"), cog=document.getElementById("cog"), status=document.getElementById("status");
+cog.addEventListener("click",()=>{
+  const open=panel.classList.toggle("open");
+  cog.setAttribute("aria-expanded",open);
+});
+document.getElementById("test").addEventListener("click",async()=>{
+  panel.classList.add("open"); cog.setAttribute("aria-expanded",true);
+  const out=[];
+  if(location.protocol==="file:")
+    out.push("BLOCKED — you opened this file directly from your disk. Nothing can load. Host it, or run a local server.");
+  else out.push("Served over "+location.protocol+" — fine.");
+
+  status.innerHTML="Checking…";
+  try{
+    const r=await fetch("https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&titles=Shrek&prop=pageimages&piprop=thumbnail&pithumbsize=300");
+    const j=await r.json();
+    out.push(j.query ? "Wikipedia API — reachable." : "Wikipedia API — replied, but no data.");
+  }catch(e){ out.push("Wikipedia API — unreachable ("+e.message+"). Network or firewall is blocking it.") }
+
+  const imgOK = await new Promise(res=>{
+    const i=new Image();
+    i.onload=()=>res(true); i.onerror=()=>res(false);
+    setTimeout(()=>res(false),8000);
+    i.src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/120px-Wikipedia-logo-v2.svg.png";
+  });
+  out.push(imgOK ? "Image server — reachable." : "Image server (upload.wikimedia.org) — blocked. This is the usual cause in restricted networks. Use a TMDB key instead.");
+
+  if(TMDB_KEY){
+    try{
+      const r=await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_KEY}&query=Shrek&year=2001`);
+      const j=await r.json();
+      out.push(j.results && j.results.length ? "TMDB — working." : "TMDB — rejected the key.");
+    }catch(e){ out.push("TMDB — unreachable ("+e.message+").") }
+  } else out.push("TMDB — no key set.");
+
+  out.push("Posters saved so far: "+cache.size());
+  status.innerHTML=out.join("<br>");
+});
+
+document.getElementById("apply").addEventListener("click",()=>{
+  const k=document.getElementById("key").value.trim();
+  if(!k){status.textContent="Enter a key, or leave it empty to keep using Wikipedia.";return}
+  TMDB_KEY=k; cache.wipe(); render();
+  status.textContent="Using TMDB. Scroll to reload the posters.";
+});
+document.getElementById("clear").addEventListener("click",()=>{
+  cache.wipe(); render();
+  status.textContent="Saved posters cleared. They will download again as you scroll.";
+});
+
+/* marquee bulbs */
+const bulbs=document.querySelector(".bulbs");
+for(let i=0;i<12;i++){const b=document.createElement("i");b.style.animationDelay=(i*.18)+"s";bulbs.appendChild(b)}
+
+if(location.protocol==="file:"){
+  panel.classList.add("open"); cog.setAttribute("aria-expanded",true);
+  status.innerHTML="Posters cannot load: this file was opened directly from disk (file://). Browsers block all outside requests in that mode. Upload it to GitHub Pages, or run a local server.";
+}
+
+render();
+</script>
+</body>
+</html>
